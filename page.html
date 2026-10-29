@@ -1,0 +1,320 @@
+<title>Soumission des ESP</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;600&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Mise en page : plaque signalétique (saisie) à gauche, fiche de verdicts à droite ; une colonne sur mobile */
+:root {
+  --bg: #eef1f3;
+  --plate: #fbfcfc;
+  --ink: #15202a;
+  --muted: #5a6975;
+  --line: #cfd7dd;
+  --accent: #0d5f7d;
+  --accent-ink: #ffffff;
+  --yes: #0d5f7d;
+  --yes-bg: #dcebf1;
+  --warn: #8a5300;
+  --warn-bg: #fbecd2;
+  --no: #6b7882;
+  --font-display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f161c; --plate: #17212a; --ink: #e4eaee; --muted: #93a3af; --line: #2b3843;
+    --accent: #5cb4d6; --accent-ink: #08151c; --yes: #7cc6e3; --yes-bg: #143341;
+    --warn: #f0b860; --warn-bg: #3a2a10; --no: #8796a1; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f161c; --plate: #17212a; --ink: #e4eaee; --muted: #93a3af; --line: #2b3843;
+  --accent: #5cb4d6; --accent-ink: #08151c; --yes: #7cc6e3; --yes-bg: #143341;
+  --warn: #f0b860; --warn-bg: #3a2a10; --no: #8796a1; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+}
+.wrap {
+  max-width: 1080px; margin: 0 auto;
+  padding-block: 32px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 28px;
+}
+header { display: grid; gap: 6px; }
+.eyebrow {
+  font-family: var(--font-data); font-size: 12px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--muted);
+}
+h1 {
+  font-family: var(--font-display); font-weight: 700; font-size: clamp(30px, 5vw, 44px);
+  line-height: 1.05; margin: 0; text-wrap: balance;
+}
+header p { margin: 0; color: var(--muted); max-width: 62ch; }
+
+.grid { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 820px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* Plaque */
+.plate {
+  position: relative; background: var(--plate); border: 1px solid var(--line);
+  border-radius: 6px; padding: 26px 24px 22px; display: grid; gap: 20px;
+}
+.plate::before, .plate::after {
+  content: ""; position: absolute; top: 10px; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--line);
+}
+.plate::before { left: 10px; } .plate::after { right: 10px; }
+.plate h2, .sheet h2 {
+  font-family: var(--font-display); font-weight: 600; font-size: 15px; letter-spacing: .1em;
+  text-transform: uppercase; margin: 0; color: var(--muted);
+}
+.field { display: grid; gap: 8px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.field > legend, .field > label.lbl { font-weight: 600; font-size: 14px; padding: 0; margin-bottom: 8px; }
+fieldset.field > legend { float: left; width: 100%; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; clear: both; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label {
+  flex: 1 1 auto; text-align: center; cursor: pointer; padding: 8px 10px; font-size: 14px;
+  border: 1px solid var(--line); border-radius: 4px; background: transparent; color: var(--ink);
+  transition: background .12s, border-color .12s;
+}
+.seg label:hover { border-color: var(--accent); }
+.seg input:checked + label { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.seg input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hint { font-size: 13px; color: var(--muted); margin: 0; }
+
+.nums { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.num { display: grid; gap: 6px; min-width: 0; }
+.num label { font-weight: 600; font-size: 14px; }
+.inp { min-width: 0; display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); }
+.inp:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+.inp input {
+  flex: 1; min-width: 0; width: 100%; border: 0; background: transparent; color: var(--ink);
+  font-family: var(--font-data); font-size: 18px; padding: 8px 10px; outline: none;
+}
+.inp input::-webkit-inner-spin-button, .inp input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.inp input[type=number] { -moz-appearance: textfield; }
+.inp span { font-family: var(--font-data); font-size: 13px; color: var(--muted); padding: 0 10px; display: flex; align-items: center; border-left: 1px solid var(--line); }
+.product {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  border-top: 1px dashed var(--line); padding-top: 14px;
+  font-family: var(--font-data); font-variant-numeric: tabular-nums;
+}
+.product b { font-size: 22px; font-weight: 600; }
+.product small { color: var(--muted); font-size: 13px; }
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; cursor: pointer; }
+.check input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+
+/* Fiche de résultats */
+.sheet { display: grid; gap: 16px; min-width: 0; }
+.summary {
+  font-family: var(--font-display); font-weight: 600; font-size: clamp(20px, 2.6vw, 26px);
+  line-height: 1.2; margin: 0; text-wrap: balance;
+}
+.banner { background: var(--warn-bg); color: var(--warn); border-radius: 4px; padding: 10px 14px; font-size: 14px; }
+.rows { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; align-items: center;
+  padding: 14px 0; border-bottom: 1px solid var(--line);
+}
+.row h3 { margin: 0; font-size: 16px; font-weight: 600; }
+.row .why { grid-column: 1 / -1; margin: 0; font-size: 14px; color: var(--muted); }
+.row .why code { font-family: var(--font-data); font-size: 13px; }
+.pill {
+  font-family: var(--font-data); font-size: 12px; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; padding: 4px 10px; border-radius: 999px; white-space: nowrap;
+}
+.pill.yes { background: var(--yes-bg); color: var(--yes); }
+.pill.no { color: var(--no); border: 1px solid var(--line); }
+.pill.warn { background: var(--warn-bg); color: var(--warn); }
+.cat { display: flex; gap: 16px; align-items: center; padding: 16px 0 4px; }
+.cat .roman {
+  font-family: var(--font-display); font-weight: 700; font-size: 48px; line-height: 1;
+  min-width: 64px; height: 64px; display: grid; place-items: center;
+  border: 2px solid var(--ink); border-radius: 4px;
+}
+.cat .roman.none { color: var(--no); border-color: var(--line); font-size: 28px; }
+.cat p { margin: 0; font-size: 14px; color: var(--muted); }
+.cat p strong { color: var(--ink); font-size: 16px; display: block; }
+.notes { margin: 0; padding-left: 18px; font-size: 14px; color: var(--muted); display: grid; gap: 4px; }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 4px; }
+footer p { margin: 0; max-width: 80ch; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Arrêté du 20 novembre 2017 · suivi en service</span>
+    <h1>Soumission des équipements sous pression</h1>
+    <p>Indiquez le type d’équipement, le fluide et ses caractéristiques&nbsp;: la fiche dit s’il est soumis à l’inspection périodique, à la requalification périodique et à la déclaration et au contrôle de mise en service.</p>
+  </header>
+
+  <div class="grid">
+    <form class="plate" id="form" autocomplete="off">
+      <h2>Caractéristiques</h2>
+
+      <fieldset class="field">
+        <legend>Type d’équipement</legend>
+        <div class="seg" id="type-seg">
+          <input type="radio" name="type" id="t-recipient" value="recipient" checked><label for="t-recipient">Récipient</label>
+          <input type="radio" name="type" id="t-tuyauterie" value="tuyauterie"><label for="t-tuyauterie">Tuyauterie</label>
+          <input type="radio" name="type" id="t-generateur" value="generateur"><label for="t-generateur">Générateur de vapeur</label>
+        </div>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>Fluide</legend>
+        <div class="seg" id="fluide-seg"></div>
+        <p class="hint" id="fluide-hint"></p>
+      </fieldset>
+
+      <div class="nums">
+        <div class="num">
+          <label for="ps">PS</label>
+          <div class="inp"><input id="ps" type="number" inputmode="decimal" min="0" step="any" value="50"><span>bar</span></div>
+        </div>
+        <div class="num">
+          <label for="dim" id="dim-label">Volume V</label>
+          <div class="inp"><input id="dim" type="number" inputmode="decimal" min="0" step="any" value="185"><span id="dim-unit">L</span></div>
+        </div>
+      </div>
+
+      <label class="check" id="acafr-wrap"><input type="checkbox" id="acafr">
+        <span>Appareil à couvercle amovible à fermeture rapide (ACAFR)</span></label>
+
+      <div class="product"><small id="prod-name">PS·V</small><span><b id="prod-val">9 250</b> <small id="prod-unit">bar·L</small></span></div>
+    </form>
+
+    <section class="sheet" aria-live="polite">
+      <h2>Résultat</h2>
+      <p class="summary" id="summary"></p>
+      <div class="banner" id="banner" hidden></div>
+      <ul class="rows" id="rows"></ul>
+      <div class="cat" id="cat"></div>
+      <ul class="notes" id="notes"></ul>
+    </section>
+  </div>
+
+  <footer>
+    <p>Logique reprise d’un tableur d’aide aux examens de dossiers et aux visites (mise à jour du 26/01/2018), avec trois corrections de catégories. Seule la réglementation fait foi.</p>
+    <p>PS : pression maximale admissible (bar relatif). Groupe 1 : gaz dangereux ; groupe 2 : autres gaz.</p>
+  </footer>
+</div>
+
+<script>
+/*REGLES*/
+</script>
+<script>
+(function () {
+  var FLUIDES = {
+    recipient: [['g1', 'Gaz groupe 1'], ['g2', 'Gaz groupe 2'], ['vapeur', 'Vapeur / eau surchauffée']],
+    tuyauterie: [['g1', 'Gaz groupe 1'], ['g2', 'Gaz groupe 2']],
+    generateur: [['vapeur', 'Vapeur / eau surchauffée'], ['calo', 'Fluide caloporteur > 120 °C']]
+  };
+  var HINTS = {
+    tuyauterie: 'Le groupe 2 inclut la vapeur et l’eau surchauffée.',
+    recipient: '', generateur: ''
+  };
+  var NOMS = { recipient: 'Ce récipient', tuyauterie: 'Cette tuyauterie', generateur: 'Ce générateur' };
+  var fem = { tuyauterie: true };
+  var $ = function (id) { return document.getElementById(id); };
+
+  function fr(n) { return Number(n).toLocaleString('fr-FR', { maximumFractionDigits: 2 }); }
+  function type() { return document.querySelector('input[name=type]:checked').value; }
+  function fluide() { var el = document.querySelector('input[name=fluide]:checked'); return el && el.value; }
+
+  function buildFluides(keep) {
+    var t = type(), seg = $('fluide-seg');
+    var opts = FLUIDES[t];
+    var cur = opts.some(function (o) { return o[0] === keep; }) ? keep : opts[0][0];
+    seg.innerHTML = opts.map(function (o) {
+      return '<input type="radio" name="fluide" id="f-' + o[0] + '" value="' + o[0] + '"' + (o[0] === cur ? ' checked' : '') +
+        '><label for="f-' + o[0] + '">' + o[1] + '</label>';
+    }).join('');
+    $('fluide-hint').textContent = HINTS[t];
+    $('fluide-hint').hidden = !HINTS[t];
+    var tuy = t === 'tuyauterie';
+    $('dim-label').textContent = tuy ? 'Diamètre DN' : 'Volume V';
+    $('dim-unit').textContent = tuy ? 'DN' : 'L';
+    $('acafr-wrap').hidden = t !== 'recipient';
+  }
+
+  function pill(ok, yes, no, cls) {
+    return '<span class="pill ' + (ok ? (cls || 'yes') : 'no') + '">' + (ok ? yes : no) + '</span>';
+  }
+  function row(title, ok, why, yes, no, cls) {
+    return '<li class="row"><h3>' + title + '</h3>' + pill(ok, yes, no, cls) + '<p class="why">' + why + '</p></li>';
+  }
+
+  function render() {
+    var t = type(), f = fluide();
+    var PS = parseFloat($('ps').value), X = parseFloat($('dim').value);
+    var e = fem[t] ? 'e' : '';
+    var S = 'Soumis' + e, N = 'Non soumis' + e;
+    if (!(PS >= 0) || !(X > 0)) {
+      $('summary').textContent = 'Saisissez une pression PS et ' + (t === 'tuyauterie' ? 'un diamètre DN' : 'un volume V') + ' positifs.';
+      $('rows').innerHTML = ''; $('cat').innerHTML = ''; $('notes').innerHTML = ''; $('banner').hidden = true;
+      $('prod-val').textContent = '–';
+      return;
+    }
+    var r = ReglesESP.evaluer({ type: t, fluide: f, PS: PS, dim: X, acafr: $('acafr').checked });
+
+    $('prod-name').textContent = r.produitNom;
+    $('prod-val').textContent = fr(r.produit);
+    $('prod-unit').textContent = r.produitUnite;
+
+    // Phrase de synthèse
+    var parts = [];
+    if (r.ip) parts.push('inspection périodique');
+    if (r.rp) parts.push('requalification périodique ' + r.epreuve);
+    if (r.dms) parts.push('DMS et CMS');
+    $('summary').textContent = r.ip
+      ? NOMS[t] + ' est soumis' + e + ' à l’arrêté\u00a0: ' + parts.join(', ') + '.'
+      : r.dms
+        ? NOMS[t] + ' n’est pas soumis' + e + ' à l’inspection périodique, mais à la DMS et au CMS.'
+        : NOMS[t] + ' n’est pas soumis' + e + ' au suivi en service de l’arrêté du 20 novembre 2017.';
+
+    $('banner').hidden = !r.horsChamp;
+    $('banner').textContent = 'PS ≤ 0,5 bar : l’équipement est hors du champ de la directive ESP, aucune catégorie n’est attribuée.';
+
+    var html = '';
+    html += row('Inspection périodique et arrêté du 20/11/2017', r.ip, r.ipWhy, S, N);
+    var rpWhy = t === 'tuyauterie' ? 'Mêmes seuils que la DMS / CMS.' : 'Mêmes seuils que l’inspection périodique.';
+    if (r.rp) rpWhy += ' ' + (r.epreuve === 'avec épreuve' ? 'Requalification avec épreuve hydraulique.' : 'Requalification sans épreuve.');
+    html += row('Requalification périodique', r.rp, rpWhy,
+      r.epreuve === 'avec épreuve' ? 'Avec épreuve' : 'Sans épreuve', N);
+    html += row('Déclaration et contrôle de mise en service (DMS / CMS)', r.dms, r.dmsWhy, 'Obligatoires', 'Non obligatoires');
+    if (t === 'recipient' && f !== 'g2') {
+      html += row('Néo-soumis', r.neo,
+        f === 'g1' ? 'Récipient de gaz du groupe 1 soumis avec PS < 4 bar.' : 'Récipient de vapeur soumis avec V < 100 L.',
+        'Oui', 'Non', 'warn');
+    }
+    $('rows').innerHTML = html;
+
+    if (t === 'generateur') {
+      $('cat').innerHTML = '';
+    } else if (r.categorie) {
+      $('cat').innerHTML = '<div class="roman">' + r.categorie.cat + '</div><p><strong>Catégorie ' + r.categorie.cat +
+        ' (DESP 2014/68/UE)</strong>Évaluation de la conformité\u00a0: ' + r.categorie.modules + '.</p>';
+    } else {
+      $('cat').innerHTML = '<div class="roman none">–</div><p><strong>Aucune catégorie</strong>' +
+        (r.horsChamp ? 'Hors champ de la directive.' : 'En dessous des seuils des catégories I à IV : règles de l’art (article 4, § 3 de la DESP).') + '</p>';
+    }
+    $('notes').innerHTML = r.notes.map(function (n) { return '<li>' + n + '</li>'; }).join('');
+    $('notes').hidden = !r.notes.length;
+  }
+
+  var lastFluide = 'g1';
+  $('type-seg').addEventListener('change', function () { buildFluides(lastFluide); render(); });
+  $('fluide-seg').addEventListener('change', function () { lastFluide = fluide(); render(); });
+  ['ps', 'dim', 'acafr'].forEach(function (id) { $(id).addEventListener('input', render); });
+  $('form').addEventListener('submit', function (ev) { ev.preventDefault(); });
+  buildFluides('g1');
+  render();
+})();
+</script>
