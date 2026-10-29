@@ -130,6 +130,14 @@ fieldset.field > legend { float: left; width: 100%; }
 }
 .row h3 { margin: 0; font-size: 16px; font-weight: 600; }
 .row .why { grid-column: 1 / -1; margin: 0; font-size: 14px; color: var(--muted); }
+.row .period {
+  grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px;
+  margin-top: 6px; padding: 8px 12px; border-left: 3px solid var(--accent); background: var(--bg);
+}
+.row .period b { font-family: var(--font-data); font-size: 15px; font-weight: 600; white-space: nowrap; }
+.row .period span { font-size: 13px; color: var(--muted); flex: 1 1 240px; min-width: 0; }
+.sel { border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--ink); font: inherit; font-size: 14px; padding: 8px 10px; width: 100%; }
+.sel:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .row .why code { font-family: var(--font-data); font-size: 13px; }
 .pill {
   font-family: var(--font-data); font-size: 12px; font-weight: 600; letter-spacing: .06em;
@@ -193,6 +201,15 @@ footer p { margin: 0; max-width: 80ch; }
         </div>
       </div>
 
+      <div class="field" id="rp-wrap">
+        <label class="lbl" for="fluide-rp">Nature du fluide (périodicité de requalification)</label>
+        <select class="sel" id="fluide-rp">
+          <option value="courant">Fluide non toxique et non corrosif</option>
+          <option value="toxique">Fluide toxique ou corrosif pour les parois</option>
+          <option value="corrosif">Fluor, HCl, HF, H₂S, phosgène… non exempt d’impuretés corrosives</option>
+        </select>
+      </div>
+
       <label class="check" id="acafr-wrap"><input type="checkbox" id="acafr">
         <span>Appareil à couvercle amovible à fermeture rapide (ACAFR)</span></label>
 
@@ -212,6 +229,7 @@ footer p { margin: 0; max-width: 80ch; }
   <footer>
     <p>Logique reprise d’un tableur d’aide aux examens de dossiers et aux visites (mise à jour du 26/01/2018), avec trois corrections de catégories. Seule la réglementation fait foi.</p>
     <p>PS : pression maximale admissible (bar relatif). Groupe 1 : gaz dangereux ; groupe 2 : autres gaz.</p>
+    <p>Les périodicités sont des maxima hors plan d’inspection (arrêté du 20/11/2017, art. 15 et 18). Avec un plan d’inspection approuvé, elles peuvent aller jusqu’à 6 ans pour l’inspection et 12 ans pour la requalification (art. 13). L’exploitant les réduit si l’état de l’équipement le justifie.</p>
   </footer>
 </div>
 
@@ -381,7 +399,33 @@ footer p { margin: 0; max-width: 80ch; }
     r.horsChamp = PS <= 0.5;
     if (r.horsChamp) r.categorie = null;
     if (!r.rp) r.epreuve = '';
+    r.ipPeriode = r.ip ? periodeIP(e) : null;
+    r.rpPeriode = r.rp ? periodeRP(e) : null;
     return r;
+  }
+
+  // Périodicités maximales hors plan d'inspection (arrêté du 20/11/2017, art. 15 I et III, art. 18 I).
+  // e.fluideRP : 'courant' | 'toxique' (toxique ou corrosif vis-à-vis des parois) | 'corrosif' (liste de l'art. 18 I, 3 ans).
+  function periodeIP(e) {
+    if (e.type === 'tuyauterie') {
+      return { duree: 'Programme de contrôle',
+        detail: 'Nature et période fixées par le programme de contrôle que l’exploitant établit dans l’année qui suit la mise en service (art. 15 III).' };
+    }
+    if (e.type === 'generateur' || e.acafr) {
+      return { duree: '2 ans', detail: 'Période réduite pour les ' + (e.type === 'generateur' ? 'générateurs de vapeur' : 'ACAFR') + ' (art. 15 I).' };
+    }
+    return { duree: '4 ans',
+      detail: 'La première inspection a lieu dans les 3 ans après la mise en service, sauf si le contrôle de mise en service a été réalisé (art. 15 I).' };
+  }
+
+  function periodeRP(e) {
+    if (e.type !== 'generateur' && e.fluideRP === 'corrosif') {
+      return { duree: '3 ans', detail: 'Fluide corrosif de la liste de l’art. 18 I (fluor, chlorure d’hydrogène, sulfure d’hydrogène…) non exempt d’impuretés corrosives.' };
+    }
+    if (e.type !== 'generateur' && e.fluideRP === 'toxique') {
+      return { duree: '6 ans', detail: 'Fluide toxique ou corrosif vis-à-vis des parois (art. 18 I).' };
+    }
+    return { duree: '10 ans', detail: 'Comptés depuis la mise en service ou la dernière requalification (art. 18 I).' };
   }
 
   var api = { evaluer: evaluer, MODULES: MODULES };
@@ -423,13 +467,16 @@ footer p { margin: 0; max-width: 80ch; }
     $('dim-label').textContent = tuy ? 'Diamètre DN' : 'Volume V';
     $('dim-unit').textContent = tuy ? 'DN' : 'L';
     $('acafr-wrap').hidden = t !== 'recipient';
+    $('rp-wrap').hidden = t === 'generateur';
   }
 
   function pill(ok, yes, no, cls) {
     return '<span class="pill ' + (ok ? (cls || 'yes') : 'no') + '">' + (ok ? yes : no) + '</span>';
   }
-  function row(title, ok, why, yes, no, cls) {
-    return '<li class="row"><h3>' + title + '</h3>' + pill(ok, yes, no, cls) + '<p class="why">' + why + '</p></li>';
+  function row(title, ok, why, yes, no, cls, periode) {
+    var per = periode ? '<div class="period"><b>' + (/^\d/.test(periode.duree) ? 'Tous les ' + periode.duree + ' au plus' : periode.duree) +
+      '</b><span>' + periode.detail + '</span></div>' : '';
+    return '<li class="row"><h3>' + title + '</h3>' + pill(ok, yes, no, cls) + '<p class="why">' + why + '</p>' + per + '</li>';
   }
 
   function render() {
@@ -443,7 +490,7 @@ footer p { margin: 0; max-width: 80ch; }
       $('prod-val').textContent = '–';
       return;
     }
-    var r = ReglesESP.evaluer({ type: t, fluide: f, PS: PS, dim: X, acafr: $('acafr').checked });
+    var r = ReglesESP.evaluer({ type: t, fluide: f, PS: PS, dim: X, acafr: $('acafr').checked, fluideRP: $('fluide-rp').value });
 
     $('prod-name').textContent = r.produitNom;
     $('prod-val').textContent = fr(r.produit);
@@ -464,11 +511,11 @@ footer p { margin: 0; max-width: 80ch; }
     $('banner').textContent = 'PS ≤ 0,5 bar : l’équipement est hors du champ de la directive ESP, aucune catégorie n’est attribuée.';
 
     var html = '';
-    html += row('Inspection périodique et arrêté du 20/11/2017', r.ip, r.ipWhy, S, N);
+    html += row('Inspection périodique et arrêté du 20/11/2017', r.ip, r.ipWhy, S, N, null, r.ipPeriode);
     var rpWhy = t === 'tuyauterie' ? 'Mêmes seuils que la DMS / CMS.' : 'Mêmes seuils que l’inspection périodique.';
     if (r.rp) rpWhy += ' ' + (r.epreuve === 'avec épreuve' ? 'Requalification avec épreuve hydraulique.' : 'Requalification sans épreuve.');
     html += row('Requalification périodique', r.rp, rpWhy,
-      r.epreuve === 'avec épreuve' ? 'Avec épreuve' : 'Sans épreuve', N);
+      r.epreuve === 'avec épreuve' ? 'Avec épreuve' : 'Sans épreuve', N, null, r.rpPeriode);
     html += row('Déclaration et contrôle de mise en service (DMS / CMS)', r.dms, r.dmsWhy, 'Obligatoires', 'Non obligatoires');
     if (t === 'recipient' && f !== 'g2') {
       html += row('Néo-soumis', r.neo,
@@ -494,6 +541,7 @@ footer p { margin: 0; max-width: 80ch; }
   $('type-seg').addEventListener('change', function () { buildFluides(lastFluide); render(); });
   $('fluide-seg').addEventListener('change', function () { lastFluide = fluide(); render(); });
   ['ps', 'dim', 'acafr'].forEach(function (id) { $(id).addEventListener('input', render); });
+  $('fluide-rp').addEventListener('change', render);
   $('form').addEventListener('submit', function (ev) { ev.preventDefault(); });
   buildFluides('g1');
   render();

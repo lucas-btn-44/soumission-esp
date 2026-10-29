@@ -47,6 +47,20 @@ Le groupe 2 inclut la vapeur et l'eau surchauffée.
 
 Le tableur ne calcule pas de catégorie DESP pour les générateurs.
 
+## Périodicités maximales (hors plan d'inspection)
+
+Source : arrêté du 20 novembre 2017, art. 15 (IP) et 18 (RP). Elles ne viennent pas du tableur.
+
+| | Inspection périodique | Requalification périodique |
+|---|---|---|
+| Récipient | 4 ans (première IP sous 3 ans après la mise en service, sauf CMS réalisé) | 10 ans |
+| Récipient ACAFR | 2 ans | 10 ans |
+| Tuyauterie | fixée par le programme de contrôle de l'exploitant (établi dans l'année suivant la mise en service) | 10 ans |
+| Générateur de vapeur | 2 ans | 10 ans |
+
+Pour les récipients et tuyauteries, la RP passe à 6 ans avec un fluide toxique ou corrosif pour les parois, et à 3 ans avec un fluide corrosif de la liste de l'art. 18 I (fluor, fluorure de bore, HF, trichlorure de bore, HCl, HBr, NO₂, phosgène, H₂S) non exempt d'impuretés corrosives.
+Avec un plan d'inspection approuvé (art. 13), les intervalles peuvent aller jusqu'à 6 ans (IP) et 12 ans (RP), ou 7 et 14 ans dans les unités à catalyseur.
+
 ## Écarts volontaires avec le tableur (validés par Lucas le 29/10/2026)
 
 Un test compare `regles.js` à une transcription brute des formules sur une grille de ~2 500 cas : les seules différences sont les trois ci-dessous.

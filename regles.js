@@ -163,7 +163,33 @@
     r.horsChamp = PS <= 0.5;
     if (r.horsChamp) r.categorie = null;
     if (!r.rp) r.epreuve = '';
+    r.ipPeriode = r.ip ? periodeIP(e) : null;
+    r.rpPeriode = r.rp ? periodeRP(e) : null;
     return r;
+  }
+
+  // Périodicités maximales hors plan d'inspection (arrêté du 20/11/2017, art. 15 I et III, art. 18 I).
+  // e.fluideRP : 'courant' | 'toxique' (toxique ou corrosif vis-à-vis des parois) | 'corrosif' (liste de l'art. 18 I, 3 ans).
+  function periodeIP(e) {
+    if (e.type === 'tuyauterie') {
+      return { duree: 'Programme de contrôle',
+        detail: 'Nature et période fixées par le programme de contrôle que l’exploitant établit dans l’année qui suit la mise en service (art. 15 III).' };
+    }
+    if (e.type === 'generateur' || e.acafr) {
+      return { duree: '2 ans', detail: 'Période réduite pour les ' + (e.type === 'generateur' ? 'générateurs de vapeur' : 'ACAFR') + ' (art. 15 I).' };
+    }
+    return { duree: '4 ans',
+      detail: 'La première inspection a lieu dans les 3 ans après la mise en service, sauf si le contrôle de mise en service a été réalisé (art. 15 I).' };
+  }
+
+  function periodeRP(e) {
+    if (e.type !== 'generateur' && e.fluideRP === 'corrosif') {
+      return { duree: '3 ans', detail: 'Fluide corrosif de la liste de l’art. 18 I (fluor, chlorure d’hydrogène, sulfure d’hydrogène…) non exempt d’impuretés corrosives.' };
+    }
+    if (e.type !== 'generateur' && e.fluideRP === 'toxique') {
+      return { duree: '6 ans', detail: 'Fluide toxique ou corrosif vis-à-vis des parois (art. 18 I).' };
+    }
+    return { duree: '10 ans', detail: 'Comptés depuis la mise en service ou la dernière requalification (art. 18 I).' };
   }
 
   var api = { evaluer: evaluer, MODULES: MODULES };

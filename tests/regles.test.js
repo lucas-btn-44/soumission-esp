@@ -48,3 +48,13 @@ for(const f of ['vapeur','calo'])for(const p of PSs)for(const v of Vs){
  if(a.epreuve!==b.ep) note(`gen ${f} ep`,[p,v,a.epreuve,b.ep]);}
 console.log(JSON.stringify(diff,null,0).replace(/\},/g,'},\n'));
 console.log(process.exitCode?'cache: ÉCHEC':'cache: OK');
+
+// Périodicités (arrêté du 20/11/2017, art. 15 et 18)
+const P=(e)=>{const r=R.evaluer(e);return [r.ipPeriode&&r.ipPeriode.duree, r.rpPeriode&&r.rpPeriode.duree].join('|');};
+A(P({type:'recipient',fluide:'g1',PS:50,dim:185}),'4 ans|10 ans','per rec');
+A(P({type:'recipient',fluide:'g1',PS:50,dim:185,acafr:true}),'2 ans|10 ans','per acafr');
+A(P({type:'recipient',fluide:'g2',PS:50,dim:185,fluideRP:'toxique'}),'4 ans|6 ans','per toxique');
+A(P({type:'tuyauterie',fluide:'g1',PS:10,dim:400,fluideRP:'corrosif'}),'Programme de contrôle|3 ans','per tuy');
+A(P({type:'generateur',fluide:'vapeur',PS:10,dim:200,fluideRP:'corrosif'}),'2 ans|10 ans','per gen');
+A(P({type:'recipient',fluide:'g1',PS:0.3,dim:10}),'|','per non soumis');
+console.log(process.exitCode?'périodicités: ÉCHEC':'périodicités: OK');
